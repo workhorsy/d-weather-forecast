@@ -94,25 +94,25 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 				return;
 			}
 
-		try {
-				JSONValue j = parseJSON(response);
-				string temperature = j["currentobservation"]["Temp"].str();
-				auto weather = j["data"]["weather"][0].str();
+			try {
+					JSONValue j = parseJSON(response);
+					string temperature = j["currentobservation"]["Temp"].str();
+					auto weather = j["data"]["weather"][0].str();
 
-				string[string] retval;
-				retval["latitude"] = latitude;
-				retval["longitude"] = longitude;
-				retval["temperature"] = temperature;
-				retval["weather"] = weather;
+					string[string] retval;
+					retval["latitude"] = latitude;
+					retval["longitude"] = longitude;
+					retval["temperature"] = temperature;
+					retval["weather"] = weather;
 
-				string[string] message;
-				message["action"] = "weather";
-				message["data_str"] = retval.to!string;
-				cb(message);
-			//stdout.writefln("!!! temperature: %s", temperature);
-		} catch (Throwable) {
-			stderr.writefln("Failed to parse weather server JSON response: %s", response);
-		}
+					string[string] message;
+					message["action"] = "weather";
+					message["data_str"] = retval.to!string;
+					cb(message);
+				//stdout.writefln("!!! temperature: %s", temperature);
+			} catch (Throwable) {
+				stderr.writefln("Failed to parse weather server JSON response: %s", response);
+			}
 		});
 	});
 }
