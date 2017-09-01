@@ -18,23 +18,6 @@ string g_longitude = "";
 string g_temperature = "Unknown";
 string g_weather = "Unknown";
 
-private void HttpGet(string url, void delegate(int status, string response) cb) {
-	import std.net.curl : HTTP, CurlException, get;
-
-	auto http = HTTP();
-	string content = "";
-
-	try {
-		content = cast(string) get(url, http);
-	} catch (CurlException ex) {
-		stderr.writefln("!!! url: %s", url);
-		stderr.writefln("!!! CurlException: %s", ex.msg);
-		//stderr.writefln("!!!!!!!!!!!!!!!! CurlException: %s", ex);
-	}
-
-	ushort status = http.statusLine().code;
-	cb(status, content);
-}
 
 string[string] Save() {
 	import std.conv : to;
@@ -158,6 +141,24 @@ private void getLocalWeather(Tid ownerTid) {
 			send(ownerTid, message.to!string);
 		});
 	});
+}
+
+private void HttpGet(string url, void delegate(int status, string response) cb) {
+	import std.net.curl : HTTP, CurlException, get;
+
+	auto http = HTTP();
+	string content = "";
+
+	try {
+		content = cast(string) get(url, http);
+	} catch (CurlException ex) {
+		stderr.writefln("!!! url: %s", url);
+		stderr.writefln("!!! CurlException: %s", ex.msg);
+		//stderr.writefln("!!!!!!!!!!!!!!!! CurlException: %s", ex);
+	}
+
+	ushort status = http.statusLine().code;
+	cb(status, content);
 }
 
 
