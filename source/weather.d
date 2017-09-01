@@ -19,7 +19,7 @@ string g_temperature = "Unknown";
 string g_weather = "Unknown";
 
 
-string[string] Save() {
+string[string] save() {
 	import std.conv : to;
 
 	string[string] retval;
@@ -33,14 +33,14 @@ string[string] Save() {
 	return retval;
 }
 
-void StartLookup() {
+void startLookup() {
 	import std.concurrency : spawn, send, thisTid;
 
 	auto childTid = spawn(&getLocalWeather, thisTid);
 	send(childTid, g_last_update_time);
 }
 
-void CheckForResult(string data_str) {
+void checkForResult(string data_str) {
 	import std.stdio : stdout, stderr;
 	import std.conv : to;
 
@@ -73,7 +73,7 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 	import std.conv : to;
 
 	// Get latitude and longitude from ip address
-	HttpGet("http://ipinfo.io/loc", delegate(int status, string response) {
+	httpGet("http://ipinfo.io/loc", delegate(int status, string response) {
 //		stdout.writeln(status);
 //		stdout.writeln(response);
 
@@ -87,7 +87,7 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 		string longitude = chomp(result[1]);
 
 		string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ latitude ~ "&lon=" ~ longitude ~ "&FcstType=json";
-		HttpGet(url, delegate(int status, string response) {
+		httpGet(url, delegate(int status, string response) {
 //		stdout.writeln(status);
 //		stdout.writeln(response);
 
@@ -146,7 +146,7 @@ private void getLocalWeather(Tid ownerTid) {
 	});
 }
 
-private void HttpGet(string url, void delegate(int status, string response) cb) {
+private void httpGet(string url, void delegate(int status, string response) cb) {
 	import std.stdio : stdout, stderr;
 	import std.net.curl : HTTP, CurlException, get;
 
@@ -173,7 +173,7 @@ int main() {
 	import std.conv : to;
 	import core.thread : Thread, seconds;
 
-	Weather.StartLookup();
+	Weather.startLookup();
 
 	receiveTimeout(dur!("nsecs")(-1), (string message_str) {
 		string[string] message = message_str.to!(string[string]);
@@ -186,7 +186,7 @@ int main() {
 
 		switch (message["action"]) {
 			case "weather":
-				Weather.CheckForResult(message["data_str"]);
+				Weather.checkForResult(message["data_str"]);
 				Weather.g_last_update_time = last_update_time;
 				break;
 			default:
@@ -195,7 +195,7 @@ int main() {
 	});
 
 	while (true) {
-		foreach (name, value ; Weather.Save()) {
+		foreach (name, value ; Weather.save()) {
 			stdout.writefln("%s=%s", name, value);
 		}
 		stdout.writefln("");
