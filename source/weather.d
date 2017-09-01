@@ -6,66 +6,8 @@
 
 module Weather;
 
-import core.stdc.time : time_t;
-import std.concurrency : Tid;
 
-
-immutable time_t UPDATE_SECONDS = 60 * 60; // 1 hour
-
-time_t g_last_update_time = 0;
-string g_latitude = "";
-string g_longitude = "";
-string g_temperature = "Unknown";
-string g_weather = "Unknown";
-
-
-string[string] save() {
-	import std.conv : to;
-
-	string[string] retval;
-
-	retval["g_last_weather_update_time"] = to!string(g_last_update_time);
-	retval["g_latitude"] = to!string(g_latitude);
-	retval["g_longitude"] = to!string(g_longitude);
-	retval["g_temperature"] = to!string(g_temperature);
-	retval["g_weather"] = to!string(g_weather);
-
-	return retval;
-}
-
-void startLookup() {
-	import std.concurrency : spawn, send, thisTid;
-
-	auto childTid = spawn(&getLocalWeather, thisTid);
-	send(childTid, g_last_update_time);
-}
-
-void checkForResult(string data_str) {
-	import std.stdio : stdout, stderr;
-	import std.conv : to;
-
-	string[string] data = to!(string[string])(data_str);
-	foreach (key, value ; data) {
-		final switch (key) {
-			case "latitude":
-				g_latitude = value;
-				break;
-			case "longitude":
-				g_longitude = value;
-				break;
-			case "temperature":
-				g_temperature = value;
-				break;
-			case "weather":
-				g_weather = value;
-				break;
-		}
-	}
-
-	stdout.writefln("Got weather data from the network.");
-}
-
-private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
+void getForecast(void delegate(string latitude, string longitude, string temperature, string weather) cb) {
 	import std.stdio : stdout, stderr;
 	import std.json : JSONValue, parseJSON;
 	import std.string : chomp;
@@ -74,9 +16,6 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 
 	// Get latitude and longitude from ip address
 	httpGet("http://ipinfo.io/loc", delegate(int status, string response) {
-//		stdout.writeln(status);
-//		stdout.writeln(response);
-
 		if (status != 200) {
 			stderr.writefln("Request for lat and lon data failed with status code: %s", status);
 			return;
@@ -88,9 +27,6 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 
 		string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ latitude ~ "&lon=" ~ longitude ~ "&FcstType=json";
 		httpGet(url, delegate(int status, string response) {
-//		stdout.writeln(status);
-//		stdout.writeln(response);
-
 			if (status != 200) {
 				stderr.writefln("Request for Weather data failed with status code: %s", status);
 				return;
@@ -101,47 +37,10 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 				string temperature = j["currentobservation"]["Temp"].str();
 				auto weather = j["data"]["weather"][0].str();
 
-				string[string] retval;
-				retval["latitude"] = latitude;
-				retval["longitude"] = longitude;
-				retval["temperature"] = temperature;
-				retval["weather"] = weather;
-
-				string[string] message;
-				message["action"] = "weather";
-				message["data_str"] = retval.to!string;
-				cb(message);
-				//stdout.writefln("!!! temperature: %s", temperature);
+				cb(latitude, longitude, temperature, weather);
 			} catch (Throwable) {
 				stderr.writefln("Failed to parse weather server JSON response: %s", response);
 			}
-		});
-	});
-}
-
-private void getLocalWeather(Tid ownerTid) {
-	import std.stdio : stdout, stderr;
-	import core.stdc.time : time;
-	import std.concurrency : send, receive;
-	import std.conv : to;
-
-	// Receive a message from the owner thread
-	receive((time_t last_update_time) {
-		// Only update if this is the first run, or the current time is 1 hour after the last update time
-		const time_t time_now = time(null);
-		const time_t diff_seconds = time_now - last_update_time;
-		//std::cout << "diff: " << diff_seconds << std::endl;
-		if (last_update_time != 0 && diff_seconds < UPDATE_SECONDS) {
-			stdout.writefln("Using cached weather data.");
-			stdout.writefln("Seconds since last weather check: %s", diff_seconds);
-			return;
-		}
-		last_update_time = time_now;
-
-		// Make the actual HTTP request
-		makeWeatherHttpRequest(delegate(string[string] message) {
-			message["last_update_time"] = to!string(last_update_time);
-			send(ownerTid, message.to!string);
 		});
 	});
 }
@@ -173,35 +72,17 @@ int main() {
 	import std.conv : to;
 	import core.thread : Thread, seconds;
 
-	Weather.startLookup();
-
-	receiveTimeout(dur!("nsecs")(-1), (string message_str) {
-		string[string] message = message_str.to!(string[string]);
-		//stdout.writefln("Message %s", message);
-
-		time_t last_update_time;
-		if ("last_update_time" in message) {
-			last_update_time = message["last_update_time"].to!time_t;
-		}
-
-		switch (message["action"]) {
-			case "weather":
-				Weather.checkForResult(message["data_str"]);
-				Weather.g_last_update_time = last_update_time;
-				break;
-			default:
-				break;
-		}
-	});
-
-	while (true) {
-		foreach (name, value ; Weather.save()) {
-			stdout.writefln("%s=%s", name, value);
-		}
-		stdout.writefln("");
+	//while (true) {
+		Weather.getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
+			stdout.writefln("latitude:%s", latitude);
+			stdout.writefln("longitude:%s", longitude);
+			stdout.writefln("temperature:%s", temperature);
+			stdout.writefln("weather:%s", weather);
+			stdout.writeln("");
+		});
 
 		Thread.sleep(5.seconds);
-	}
+	//}
 
 	return 0;
 }
