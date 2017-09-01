@@ -159,3 +159,43 @@ private void getLocalWeather(Tid ownerTid) {
 		});
 	});
 }
+
+
+int main() {
+	import std.concurrency : receiveTimeout;
+	import std.datetime : dur;
+	import std.conv : to;
+	import core.thread : Thread, seconds;
+
+	Weather.StartLookup();
+
+	receiveTimeout(dur!("nsecs")(-1), (string message_str) {
+		string[string] message = message_str.to!(string[string]);
+		//stdout.writefln("Message %s", message);
+
+		time_t last_update_time;
+		if ("last_update_time" in message) {
+			last_update_time = message["last_update_time"].to!time_t;
+		}
+
+		switch (message["action"]) {
+			case "weather":
+				Weather.CheckForResult(message["data_str"]);
+				Weather.g_last_update_time = last_update_time;
+				break;
+			default:
+				break;
+		}
+	});
+
+	while (true) {
+		foreach (name, value ; Weather.Save()) {
+			stdout.writefln("%s=%s", name, value);
+		}
+		stdout.writefln("");
+
+		Thread.sleep(5.seconds);
+	}
+
+	return 0;
+}
