@@ -3,9 +3,9 @@
 // Get weather report with the D programming language
 // https://github.com/workhorsy/d-weather
 
+
 module Weather;
 
-import std.stdio : stdout, stderr;
 import core.stdc.time : time_t;
 import std.concurrency : Tid;
 
@@ -41,6 +41,7 @@ void StartLookup() {
 }
 
 void CheckForResult(string data_str) {
+	import std.stdio : stdout, stderr;
 	import std.conv : to;
 
 	string[string] data = to!(string[string])(data_str);
@@ -65,6 +66,7 @@ void CheckForResult(string data_str) {
 }
 
 private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
+	import std.stdio : stdout, stderr;
 	import std.json : JSONValue, parseJSON;
 	import std.string : chomp;
 	import std.array : split;
@@ -118,6 +120,7 @@ private void makeWeatherHttpRequest(void delegate(string[string] message) cb) {
 }
 
 private void getLocalWeather(Tid ownerTid) {
+	import std.stdio : stdout, stderr;
 	import core.stdc.time : time;
 	import std.concurrency : send, receive;
 	import std.conv : to;
@@ -144,6 +147,7 @@ private void getLocalWeather(Tid ownerTid) {
 }
 
 private void HttpGet(string url, void delegate(int status, string response) cb) {
+	import std.stdio : stdout, stderr;
 	import std.net.curl : HTTP, CurlException, get;
 
 	auto http = HTTP();
@@ -163,6 +167,7 @@ private void HttpGet(string url, void delegate(int status, string response) cb) 
 
 
 int main() {
+	import std.stdio : stdout, stderr;
 	import std.concurrency : receiveTimeout;
 	import std.datetime : dur;
 	import std.conv : to;
