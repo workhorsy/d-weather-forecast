@@ -3,6 +3,32 @@
 // Get weather report with the D programming language
 // https://github.com/workhorsy/d-weather
 
+/++
+Get weather report with the D programming language. It first gets your longitude
+and latitude using http://ipinfo.io. Then looks up your weather using
+http://forecast.weather.gov.
+
+Home page:
+$(LINK https://github.com/workhorsy/d-weather)
+
+Version: 1.0.0
+
+License:
+Boost Software License - Version 1.0
+
+Examples:
+----
+import std.stdio : stdout;
+import Weather : getForecast;
+
+getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
+	stdout.writefln("latitude: %s", latitude);
+	stdout.writefln("longitude: %s", longitude);
+	stdout.writefln("temperature: %s", temperature);
+	stdout.writefln("weather: %s", weather);
+});
+----
++/
 
 module Weather;
 
@@ -32,6 +58,12 @@ static this() {
 	httpGet = httpGetDefault;
 }
 
+/++
+Returns the weather forecast using a callback.
+
+Params:
+ cb = The callback to fire when weather info has been downloaded.
++/
 void getForecast(void delegate(string latitude, string longitude, string temperature, string weather) cb) {
 	import std.stdio : stdout, stderr;
 	import std.json : JSONValue, parseJSON;
