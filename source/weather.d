@@ -19,7 +19,7 @@ Boost Software License - Version 1.0
 Examples:
 ----
 import std.stdio : stdout;
-import Weather : getForecast;
+import WeatherForecast : getForecast;
 
 getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
 	stdout.writefln("latitude: %s", latitude);
@@ -30,7 +30,7 @@ getForecast(delegate(string latitude, string longitude, string temperature, stri
 ----
 +/
 
-module Weather;
+module WeatherForecast;
 
 void delegate(string url, void delegate(int status, string response) cb) httpGet;
 private void delegate(string url, void delegate(int status, string response) cb) httpGetDefault;
@@ -115,7 +115,7 @@ unittest {
 		"currentobservation": { "Temp" : "70" } }
 	}`;
 
-	Weather.httpGet = delegate(string url, void delegate(int status, string response) cb) {
+	WeatherForecast.httpGet = delegate(string url, void delegate(int status, string response) cb) {
 		import std.string : startsWith;
 
 		if (url.startsWith("http://ipinfo.io/loc")) {
@@ -125,9 +125,9 @@ unittest {
 		}
 	};
 
-	describe("Weather",
+	describe("WeatherForecast",
 		it("Should get a forecast", delegate() {
-			Weather.getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
+			WeatherForecast.getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
 				latitude.shouldEqual("37.7749");
 				longitude.shouldEqual("-122.4194");
 				temperature.shouldEqual("70");

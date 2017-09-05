@@ -13,7 +13,7 @@
 		"bdd": "~>1.3.0",
 	},
 
-	"targetName": "weather",
+	"targetName": "weather_forecast",
 	"targetType": "staticLibrary",
 	"targetPath": "lib",
 }
