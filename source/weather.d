@@ -57,15 +57,18 @@ void getForecast(void delegate(string latitude, string longitude, string tempera
 				return;
 			}
 
+			string temperature = "";
+			string weather = "";
 			try {
 				JSONValue j = parseJSON(response);
-				string temperature = j["currentobservation"]["Temp"].str();
-				auto weather = j["data"]["weather"][0].str();
-
-				cb(latitude, longitude, temperature, weather);
+				temperature = j["currentobservation"]["Temp"].str();
+				weather = j["data"]["weather"][0].str();
 			} catch (Throwable) {
 				stderr.writefln("Failed to parse Weather server JSON response: %s", response);
+				return;
 			}
+
+			cb(latitude, longitude, temperature, weather);
 		});
 	});
 }
