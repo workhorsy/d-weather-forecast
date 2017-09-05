@@ -6,9 +6,33 @@
 
 module Weather;
 
+void delegate(string url, void delegate(int status, string response) cb) httpGet;
+private void delegate(string url, void delegate(int status, string response) cb) httpGetDefault;
 
+static this() {
+	httpGetDefault = delegate(string url, void delegate(int status, string response) cb) {
+		import std.stdio : stdout, stderr;
+		import std.net.curl : HTTP, CurlException, get;
 
-void getForecast(void delegate(string url, void delegate(int status, string response) cb) http_cb, void delegate(string latitude, string longitude, string temperature, string weather) cb) {
+		auto http = HTTP();
+		string content = "";
+
+		try {
+			content = cast(string) get(url, http);
+		} catch (CurlException ex) {
+			stderr.writefln("!!! url: %s", url);
+			stderr.writefln("!!! CurlException: %s", ex.msg);
+			//stderr.writefln("!!!!!!!!!!!!!!!! CurlException: %s", ex);
+		}
+
+		ushort status = http.statusLine().code;
+		cb(status, content);
+	};
+
+	httpGet = httpGetDefault;
+}
+
+void getForecast(void delegate(string latitude, string longitude, string temperature, string weather) cb) {
 	import std.stdio : stdout, stderr;
 	import std.json : JSONValue, parseJSON;
 	import std.string : chomp;
@@ -16,7 +40,7 @@ void getForecast(void delegate(string url, void delegate(int status, string resp
 	import std.conv : to;
 
 	// Get latitude and longitude from ip address
-	http_cb("http://ipinfo.io/loc", delegate(int status, string response) {
+	httpGet("http://ipinfo.io/loc", delegate(int status, string response) {
 		if (status != 200) {
 			stderr.writefln("Request for lat and lon data failed with status code: %s", status);
 			return;
@@ -27,7 +51,7 @@ void getForecast(void delegate(string url, void delegate(int status, string resp
 		string longitude = chomp(result[1]);
 
 		string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ latitude ~ "&lon=" ~ longitude ~ "&FcstType=json";
-		http_cb(url, delegate(int status, string response) {
+		httpGet(url, delegate(int status, string response) {
 			if (status != 200) {
 				stderr.writefln("Request for Weather data failed with status code: %s", status);
 				return;
@@ -46,26 +70,6 @@ void getForecast(void delegate(string url, void delegate(int status, string resp
 	});
 }
 
-void httpGet(string url, void delegate(int status, string response) cb) {
-	import std.stdio : stdout, stderr;
-	import std.net.curl : HTTP, CurlException, get;
-
-	auto http = HTTP();
-	string content = "";
-
-	try {
-		content = cast(string) get(url, http);
-	} catch (CurlException ex) {
-		stderr.writefln("!!! url: %s", url);
-		stderr.writefln("!!! CurlException: %s", ex.msg);
-		//stderr.writefln("!!!!!!!!!!!!!!!! CurlException: %s", ex);
-	}
-
-	ushort status = http.statusLine().code;
-	cb(status, content);
-}
-
-
 unittest {
 	import BDD;
 
@@ -76,7 +80,7 @@ unittest {
 		"currentobservation": { "Temp" : "70" } }
 	}`;
 
-	void httpGetMock(string url, void delegate(int status, string response) cb) {
+	Weather.httpGet = delegate(string url, void delegate(int status, string response) cb) {
 		import std.string : startsWith;
 
 		if (url.startsWith("http://ipinfo.io/loc")) {
@@ -84,11 +88,11 @@ unittest {
 		} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
 			cb(200, RESULT_WEATHER);
 		}
-	}
+	};
 
 	describe("Weather",
 		it("Should get a forecast", delegate() {
-			Weather.getForecast(&httpGetMock, delegate(string latitude, string longitude, string temperature, string weather) {
+			Weather.getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
 				latitude.shouldEqual("37.7749");
 				longitude.shouldEqual("-122.4194");
 				temperature.shouldEqual("70");
@@ -97,4 +101,3 @@ unittest {
 		}),
 	);
 }
-
