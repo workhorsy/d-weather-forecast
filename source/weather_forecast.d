@@ -32,31 +32,6 @@ getForecast(delegate(string latitude, string longitude, string temperature, stri
 
 module WeatherForecast;
 
-void delegate(string url, void delegate(int status, string response) cb) httpGet;
-private void delegate(string url, void delegate(int status, string response) cb) httpGetDefault;
-
-static this() {
-	httpGetDefault = delegate(string url, void delegate(int status, string response) cb) {
-		import std.stdio : stdout, stderr;
-		import std.net.curl : HTTP, CurlException, get;
-
-		auto http = HTTP();
-		string content = "";
-
-		try {
-			content = cast(string) get(url, http);
-		} catch (CurlException ex) {
-			stderr.writefln("!!! url: %s", url);
-			stderr.writefln("!!! CurlException: %s", ex.msg);
-			//stderr.writefln("!!!!!!!!!!!!!!!! CurlException: %s", ex);
-		}
-
-		ushort status = http.statusLine().code;
-		cb(status, content);
-	};
-
-	httpGet = httpGetDefault;
-}
 
 /++
 Returns the weather forecast using a callback.
@@ -70,55 +45,61 @@ void getForecast(void delegate(string latitude, string longitude, string tempera
 	import std.string : chomp;
 	import std.array : split;
 	import std.conv : to;
+	import ipinfo : getIpinfo, IpinfoData, httpGet;
 
-	// Get latitude and longitude from ip address
-	httpGet("http://ipinfo.io/loc", delegate(int status, string response) {
-		if (status != 200) {
-			stderr.writefln("Request for lat and lon data failed with status code: %s", status);
-			return;
+	getIpinfo(delegate(IpinfoData data, Exception err) {
+		if (err) {
+			stderr.writefln("%s", err);
+		} else {
+			string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ data.latitude ~ "&lon=" ~ data.longitude ~ "&FcstType=json";
+
+			httpGet(url, delegate(int status, string response) {
+				if (status != 200) {
+					stderr.writefln("Request for Weather data failed with status code: %s", status);
+					return;
+				}
+
+				string temperature = "";
+				string weather = "";
+				try {
+					JSONValue j = parseJSON(response);
+					temperature = j["currentobservation"]["Temp"].str();
+					weather = j["data"]["weather"][0].str();
+				} catch (Throwable) {
+					stderr.writefln("Failed to parse Weather server JSON response: %s", response);
+					return;
+				}
+
+				cb(data.latitude, data.longitude, temperature, weather);
+			});
 		}
-
-		string[] result = split(response, ",");
-		string latitude = chomp(result[0]);
-		string longitude = chomp(result[1]);
-
-		string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ latitude ~ "&lon=" ~ longitude ~ "&FcstType=json";
-		httpGet(url, delegate(int status, string response) {
-			if (status != 200) {
-				stderr.writefln("Request for Weather data failed with status code: %s", status);
-				return;
-			}
-
-			string temperature = "";
-			string weather = "";
-			try {
-				JSONValue j = parseJSON(response);
-				temperature = j["currentobservation"]["Temp"].str();
-				weather = j["data"]["weather"][0].str();
-			} catch (Throwable) {
-				stderr.writefln("Failed to parse Weather server JSON response: %s", response);
-				return;
-			}
-
-			cb(latitude, longitude, temperature, weather);
-		});
 	});
 }
 
 unittest {
 	import BDD;
+	import ipinfo : httpGet;
 
-	immutable string RESULT_IP = "37.7749,-122.4194\r\n";
+	immutable string RESULT_IP = 
+	`{
+		"ip": "8.8.8.8",
+		"loc": "37.7749,-122.4194",
+		"org": "AS15169 Google Inc.",
+		"city": "Mountain View",
+		"region": "California",
+		"country": "US",
+		"postal": "94043"
+	}`;
 	immutable string RESULT_WEATHER =
 	`{
 		"data": { "weather": [ "Hot" ] },
 		"currentobservation": { "Temp" : "70" } }
 	}`;
 
-	WeatherForecast.httpGet = delegate(string url, void delegate(int status, string response) cb) {
+	httpGet = delegate(string url, void delegate(int status, string response) cb) {
 		import std.string : startsWith;
 
-		if (url.startsWith("http://ipinfo.io/loc")) {
+		if (url.startsWith("https://ipinfo.io/json")) {
 			cb(200, RESULT_IP);
 		} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
 			cb(200, RESULT_WEATHER);
