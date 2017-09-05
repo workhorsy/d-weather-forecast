@@ -1,5 +1,5 @@
 # D Weather Forecast
-Get weather forecast with the D programming language
+Get weather forecast from http://forecast.weather.gov with the D programming language
 
 # Example
 
