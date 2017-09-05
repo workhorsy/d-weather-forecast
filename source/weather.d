@@ -1,15 +1,15 @@
 // Copyright (c) 2017 Matthew Brennan Jones <matthew.brennan.jones@gmail.com>
 // Boost Software License - Version 1.0
-// Get weather report with the D programming language
-// https://github.com/workhorsy/d-weather
+// Get weather forecast with the D programming language
+// https://github.com/workhorsy/d-weather-forecast
 
 /++
-Get weather report with the D programming language. It first gets your longitude
+Get weather forecast with the D programming language. It first gets your longitude
 and latitude using http://ipinfo.io. Then looks up your weather using
 http://forecast.weather.gov.
 
 Home page:
-$(LINK https://github.com/workhorsy/d-weather)
+$(LINK https://github.com/workhorsy/d-weather-forecast)
 
 Version: 1.0.0
 
