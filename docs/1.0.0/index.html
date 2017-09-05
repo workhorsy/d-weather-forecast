@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>Weather</title>
+    <title>WeatherForecast</title>
     <style type="text/css" media="screen">
       html, body, div, span, object, iframe, h1, h2, h3, h4, h5, h6, p,
       blockquote, pre, a, abbr, address, cite, code, del, dfn, em, figure,
@@ -463,22 +463,20 @@
   <body id="ddoc_main" class="ddoc dlang">
     <div class="content_wrapper">
       <article class="module">
-        <h1 class="module_name">Weather</h1>
+        <h1 class="module_name">WeatherForecast</h1>
         <section id="module_content"><section class="section ddoc_sections">
   <div class="ddoc_summary">
   <p class="para">
     Get weather forecast with the D programming language. It first gets your longitude
-and latitude using http://ipinfo.io. Then looks up your weather using
+and latitude using http://ipinfo.io. Then uses them to look up your
+weather using http://forecast.weather.gov.
 
   </p>
 </div>
-<div class="ddoc_section">
+<div class="ddoc_description">
+  <h4>Discussion</h4>
   <p class="para">
-    <span class="ddoc_section_h">http:</span>
-//forecast.weather.gov.
-<br><br>
-
-Home page:
+    Home page:
 <a href="https://github.com/workhorsy/d-weather-forecast">https://github.com/workhorsy/d-weather-forecast</a>
 
 
@@ -508,14 +506,22 @@ Home page:
   <div class="code_sample">
     <div class="dlang">
       <ol class="code_lines">
-        <li><code class="code"><span class="keyword">import</span> std.stdio : stdout;
-<span class="keyword">import</span> <span class="psymbol">Weather</span> : getForecast;
+        <li><code class="code"><span class="keyword">import</span> std.stdio : stdout, stderr;
+<span class="keyword">import</span> <span class="psymbol">WeatherForecast</span> : getForecast, WeatherData;
 
-getForecast(<span class="keyword">delegate</span>(string latitude, string longitude, string temperature, string weather) {
-	stdout.writefln(<span class="string_literal">"latitude: %s"</span>, latitude);
-	stdout.writefln(<span class="string_literal">"longitude: %s"</span>, longitude);
-	stdout.writefln(<span class="string_literal">"temperature: %s"</span>, temperature);
-	stdout.writefln(<span class="string_literal">"weather: %s"</span>, weather);
+getForecast(<span class="keyword">delegate</span>(WeatherData weather_data, Exception err) {
+	<span class="keyword">if</span> (err) {
+		stderr.writefln(<span class="string_literal">"%s"</span>, err);
+	} <span class="keyword">else</span> {
+		stdout.writefln(<span class="string_literal">"latitude: %s"</span>, weather_data.latitude);
+		stdout.writefln(<span class="string_literal">"longitude: %s"</span>, weather_data.longitude);
+		stdout.writefln(<span class="string_literal">"city: %s"</span>, weather_data.city);
+		stdout.writefln(<span class="string_literal">"region: %s"</span>, weather_data.region);
+		stdout.writefln(<span class="string_literal">"country: %s"</span>, weather_data.country);
+		stdout.writefln(<span class="string_literal">"postal: %s"</span>, weather_data.postal);
+		stdout.writefln(<span class="string_literal">"temperature: %s"</span>, weather_data.temperature);
+		stdout.writefln(<span class="string_literal">"summary: %s"</span>, weather_data.summary);
+	}
 });
 </code></li>
       </ol>
@@ -533,6 +539,59 @@ getForecast(<span class="keyword">delegate</span>(string latitude, string longit
   <li class="ddoc_member">
   <div class="ddoc_member_header">
   <div class="ddoc_header_anchor">
+  <a href="#WeatherData" id="WeatherData"><code class="code">WeatherData</code></a>
+</div>
+</div><div class="ddoc_decl">
+  <section class="section">
+    <div class="declaration">
+      <h4>Declaration</h4>
+      <div class="dlang">
+        <p class="para">
+          <code class="code">
+            <span class="ddoc_anchor" id="WeatherData"></span>struct <code class="code">WeatherData</code>;
+
+          </code>
+        </p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="ddoc_decl">
+  <section class="section ddoc_sections">
+  <div class="ddoc_summary">
+  <p class="para">
+    Data gathered in <code class="code">WeatherData</code>:
+
+<section class="code_listing">
+  <div class="code_sample">
+    <div class="dlang">
+      <ol class="code_lines">
+        <li><code class="code"><span class="keyword">struct</span> <span class="psymbol">WeatherData</span> {
+	string latitude;
+	string longitude;
+	string city;
+	string region;
+	string country;
+	string postal;
+	string temperature;
+	string summary;
+}
+</code></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+  </p>
+</div>
+
+</section>
+
+</div>
+
+</li><li class="ddoc_member">
+  <div class="ddoc_member_header">
+  <div class="ddoc_header_anchor">
   <a href="#getForecast" id="getForecast"><code class="code">getForecast</code></a>
 </div>
 </div><div class="ddoc_decl">
@@ -542,7 +601,7 @@ getForecast(<span class="keyword">delegate</span>(string latitude, string longit
       <div class="dlang">
         <p class="para">
           <code class="code">
-            <span class="ddoc_anchor" id="getForecast"></span>void <code class="code">getForecast</code>(void delegate(string latitude, string longitude, string temperature, string weather) <code class="code">cb</code>);
+            <span class="ddoc_anchor" id="getForecast"></span>void <code class="code">getForecast</code>(void delegate(WeatherData weather_data, Exception err) <code class="code">cb</code>);
 
           </code>
         </p>
@@ -565,7 +624,7 @@ getForecast(<span class="keyword">delegate</span>(string latitude, string longit
       <tr class="ddoc_param_row">
   <td scope="ddoc_param_id">
   <code class="code">
-    <em class="term">void delegate(string latitude, string longitude, string temperature, string weather) <code class="code">cb</code></em>
+    <em class="term">void delegate(WeatherData weather_data, Exception err) <code class="code">cb</code></em>
   </code>
 </td>
 <td>
@@ -579,6 +638,12 @@ getForecast(<span class="keyword">delegate</span>(string latitude, string longit
 
     </tbody>
   </table>
+</div>
+<div class="ddoc_throws">
+  <h4>Throws</h4>
+  <p class="para">
+    If it fails to download or parse the JSON response.
+  </p>
 </div>
 
 </section>

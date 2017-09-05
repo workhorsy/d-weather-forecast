@@ -5,8 +5,8 @@
 
 /++
 Get weather forecast with the D programming language. It first gets your longitude
-and latitude using http://ipinfo.io. Then looks up your weather using
-http://forecast.weather.gov.
+and latitude using http://ipinfo.io. Then uses them to look up your 
+weather using http://forecast.weather.gov.
 
 Home page:
 $(LINK https://github.com/workhorsy/d-weather-forecast)
@@ -18,19 +18,44 @@ Boost Software License - Version 1.0
 
 Examples:
 ----
-import std.stdio : stdout;
-import WeatherForecast : getForecast;
+import std.stdio : stdout, stderr;
+import WeatherForecast : getForecast, WeatherData;
 
-getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
-	stdout.writefln("latitude: %s", latitude);
-	stdout.writefln("longitude: %s", longitude);
-	stdout.writefln("temperature: %s", temperature);
-	stdout.writefln("weather: %s", weather);
+getForecast(delegate(WeatherData weather_data, Exception err) {
+	if (err) {
+		stderr.writefln("%s", err);
+	} else {
+		stdout.writefln("latitude: %s", weather_data.latitude);
+		stdout.writefln("longitude: %s", weather_data.longitude);
+		stdout.writefln("city: %s", weather_data.city);
+		stdout.writefln("region: %s", weather_data.region);
+		stdout.writefln("country: %s", weather_data.country);
+		stdout.writefln("postal: %s", weather_data.postal);
+		stdout.writefln("temperature: %s", weather_data.temperature);
+		stdout.writefln("summary: %s", weather_data.summary);
+	}
 });
 ----
 +/
 
 module WeatherForecast;
+
+
+/++
+Data gathered in WeatherData:
+----
+struct WeatherData {
+	string latitude;
+	string longitude;
+	string city;
+	string region;
+	string country;
+	string postal;
+	string temperature;
+	string summary;
+}
+----
++/
 
 struct WeatherData {
 	string latitude;
