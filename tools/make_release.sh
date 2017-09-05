@@ -8,7 +8,7 @@ cd ..
 sed 's/$VERSION/'$VERSION'/g' tools/README.template.md > README.md
 
 # Generate documentation
-dmd -c -D source/weather.d -Df=docs/$VERSION/index.html
+dmd -c -D source/weather_forecast.d -Df=docs/$VERSION/index.html
 git add docs/$VERSION/
 
 # Create release

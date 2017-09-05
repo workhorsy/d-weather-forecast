@@ -8,7 +8,7 @@ Get weather forecast with the D programming language
 # Generate documentation
 
 ```
-dmd -c -D source/weather.d -Df=docs/1.0.0/index.html
+dmd -c -D source/weather_forecast.d -Df=docs/1.0.0/index.html
 ```
 
 # Run unit tests
