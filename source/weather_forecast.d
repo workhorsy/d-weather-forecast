@@ -32,45 +32,67 @@ getForecast(delegate(string latitude, string longitude, string temperature, stri
 
 module WeatherForecast;
 
+struct WeatherData {
+	string latitude;
+	string longitude;
+	string city;
+	string region;
+	string country;
+	string postal;
+	string temperature;
+	string summary;
+}
 
 /++
 Returns the weather forecast using a callback.
 
 Params:
  cb = The callback to fire when weather info has been downloaded.
+
+Throws:
+	If it fails to download or parse the JSON response.
 +/
-void getForecast(void delegate(string latitude, string longitude, string temperature, string weather) cb) {
+void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 	import std.stdio : stdout, stderr;
 	import std.json : JSONValue, parseJSON;
-	import std.string : chomp;
+	import std.string : chomp, format;
 	import std.array : split;
 	import std.conv : to;
 	import ipinfo : getIpinfo, IpinfoData, httpGet;
 
-	getIpinfo(delegate(IpinfoData data, Exception err) {
+	WeatherData weather_data;
+
+	getIpinfo(delegate(IpinfoData ipinfo_data, Exception err) {
 		if (err) {
 			stderr.writefln("%s", err);
 		} else {
-			string url = "http://forecast.weather.gov/MapClick.php?lat=" ~ data.latitude ~ "&lon=" ~ data.longitude ~ "&FcstType=json";
+			string URL = "http://forecast.weather.gov/MapClick.php?lat=" ~ ipinfo_data.latitude ~ "&lon=" ~ ipinfo_data.longitude ~ "&FcstType=json";
 
-			httpGet(url, delegate(int status, string response) {
+			httpGet(URL, delegate(int status, string response) {
 				if (status != 200) {
-					stderr.writefln("Request for Weather data failed with status code: %s", status);
+					auto err = new Exception("Request for \"%s\" failed with status code: %s".format(URL, status));
+					cb(weather_data, err);
 					return;
 				}
 
-				string temperature = "";
-				string weather = "";
 				try {
 					JSONValue j = parseJSON(response);
-					temperature = j["currentobservation"]["Temp"].str();
-					weather = j["data"]["weather"][0].str();
+
+					weather_data.latitude = ipinfo_data.latitude;
+					weather_data.longitude = ipinfo_data.longitude;
+					weather_data.city = ipinfo_data.city;
+					weather_data.region = ipinfo_data.region;
+					weather_data.country = ipinfo_data.country;
+					weather_data.postal = ipinfo_data.postal;
+					weather_data.temperature = j["currentobservation"]["Temp"].str();
+					weather_data.summary = j["data"]["weather"][0].str();
 				} catch (Throwable) {
-					stderr.writefln("Failed to parse Weather server JSON response: %s", response);
+					auto err = new Exception("Failed to parse \"%s\" JSON response".format(URL));
+					cb(weather_data, err);
 					return;
 				}
 
-				cb(data.latitude, data.longitude, temperature, weather);
+				cb(weather_data, null);
 			});
 		}
 	});
@@ -108,11 +130,17 @@ unittest {
 
 	describe("WeatherForecast",
 		it("Should get a forecast", delegate() {
-			WeatherForecast.getForecast(delegate(string latitude, string longitude, string temperature, string weather) {
-				latitude.shouldEqual("37.7749");
-				longitude.shouldEqual("-122.4194");
-				temperature.shouldEqual("70");
-				weather.shouldEqual("Hot");
+			WeatherForecast.getForecast(delegate(WeatherData weather_data, Exception err) {
+				err.shouldBeNull();
+
+				weather_data.latitude.shouldEqual("37.7749");
+				weather_data.longitude.shouldEqual("-122.4194");
+				weather_data.city.shouldEqual("Mountain View");
+				weather_data.region.shouldEqual("California");
+				weather_data.country.shouldEqual("US");
+				weather_data.postal.shouldEqual("94043");
+				weather_data.temperature.shouldEqual("70");
+				weather_data.summary.shouldEqual("Hot");
 			});
 		}),
 	);
