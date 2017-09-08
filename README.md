@@ -25,7 +25,7 @@ Mostly Sunny
 
 # Documentation
 
-[https://workhorsy.github.io/d-weather-forecast/1.0.0/](https://workhorsy.github.io/d-weather-forecast/1.0.0/)
+[https://workhorsy.github.io/d-weather-forecast/1.1.0/](https://workhorsy.github.io/d-weather-forecast/1.1.0/)
 
 # Generate documentation
 

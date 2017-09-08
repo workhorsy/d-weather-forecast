@@ -1,5 +1,27 @@
 # D Weather Forecast
-Get weather forecast with the D programming language
+Get weather forecast from http://forecast.weather.gov with the D programming language
+
+# Example
+
+```d
+import weather_forecast : getForecast, WeatherData;
+import std.stdio : stdout;
+
+getForecast(delegate(WeatherData weather_data, Exception err) {
+  if (! err) {
+    stdout.writefln("%s, %s", weather_data.city, weather_data.region);
+    stdout.writefln("%s", weather_data.summary);
+    stdout.writefln("%s F", weather_data.temperature);
+  }
+});
+
+/*
+San Francisco, California
+Mostly Sunny
+76 F
+*/
+
+```
 
 # Documentation
 
@@ -8,7 +30,7 @@ Get weather forecast with the D programming language
 # Generate documentation
 
 ```
-dmd -c -D source/weather_forecast.d -Df=docs/$VERSION/index.html
+dub --build=docs
 ```
 
 # Run unit tests
