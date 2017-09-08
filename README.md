@@ -4,7 +4,7 @@ Get weather forecast from http://forecast.weather.gov with the D programming lan
 # Example
 
 ```d
-import WeatherForecast : getForecast, WeatherData;
+import weather_forecast : getForecast, WeatherData;
 import std.stdio : stdout;
 
 getForecast(delegate(WeatherData weather_data, Exception err) {

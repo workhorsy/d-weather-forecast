@@ -3,7 +3,7 @@
 
 int main() {
 	import std.stdio : stdout, stderr;
-	import WeatherForecast : getForecast, WeatherData;
+	import weather_forecast : getForecast, WeatherData;
 
 	getForecast(delegate(WeatherData weather_data, Exception err) {
 		if (err) {

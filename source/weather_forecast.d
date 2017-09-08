@@ -19,7 +19,7 @@ Boost Software License - Version 1.0
 Examples:
 ----
 import std.stdio : stdout, stderr;
-import WeatherForecast : getForecast, WeatherData;
+import weather_forecast : getForecast, WeatherData;
 
 getForecast(delegate(WeatherData weather_data, Exception err) {
 	if (err) {
@@ -38,7 +38,7 @@ getForecast(delegate(WeatherData weather_data, Exception err) {
 ----
 +/
 
-module WeatherForecast;
+module weather_forecast;
 
 
 /++

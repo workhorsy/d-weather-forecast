@@ -3,7 +3,7 @@
 import BDD;
 
 unittest {
-	import WeatherForecast : getForecast, WeatherData;
+	import weather_forecast : getForecast, WeatherData;
 	import ipinfo : httpGet;
 
 	immutable string RESULT_IP =
@@ -32,7 +32,7 @@ unittest {
 		}
 	};
 
-	describe("WeatherForecast",
+	describe("weather_forecast",
 		it("Should get a forecast", delegate() {
 			getForecast(delegate(WeatherData weather_data, Exception err) {
 				err.shouldBeNull();
