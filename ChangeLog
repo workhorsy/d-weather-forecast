@@ -1,4 +1,4 @@
 
-* Release 1.2.0
+9/17/2017 Release 1.2.0
 	* Fixed Bug #2: Only require BDD for running tests
 	* Fixed Bug #3: If ipinfo fails no error is returned
