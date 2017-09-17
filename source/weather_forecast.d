@@ -89,7 +89,7 @@ void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 
 	getIpinfo(delegate(IpinfoData ipinfo_data, Exception err) {
 		if (err) {
-			stderr.writefln("%s", err);
+			cb(WeatherData.init, err);
 		} else {
 			string URL = "http://forecast.weather.gov/MapClick.php?lat=" ~ ipinfo_data.latitude ~ "&lon=" ~ ipinfo_data.longitude ~ "&FcstType=json";
 

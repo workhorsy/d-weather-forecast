@@ -47,6 +47,70 @@ unittest {
 				weather_data.summary.shouldEqual("Hot");
 			});
 		}),
+		it("Should return an error when failing to parse ipinfo json response", delegate() {
+			httpGet = delegate(string url, void delegate(int status, string response) cb) {
+				import std.string : startsWith;
+
+				if (url.startsWith("https://ipinfo.io/json")) {
+					cb(200, "{");
+				} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
+					cb(200, RESULT_WEATHER);
+				}
+			};
+
+			getForecast(delegate(WeatherData weather_data, Exception err) {
+				err.shouldNotBeNull();
+				err.msg.shouldEqual(`Failed to parse "https://ipinfo.io/json" JSON response`);
+			});
+		}),
+		it("Should return an error when the ipinfo server fails", delegate() {
+			httpGet = delegate(string url, void delegate(int status, string response) cb) {
+				import std.string : startsWith;
+
+				if (url.startsWith("https://ipinfo.io/json")) {
+					cb(500, "");
+				} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
+					cb(200, RESULT_WEATHER);
+				}
+			};
+
+			getForecast(delegate(WeatherData weather_data, Exception err) {
+				err.shouldNotBeNull();
+				err.msg.shouldEqual(`Request for "https://ipinfo.io/json" failed with status code: 500`);
+			});
+		}),
+		it("Should return an error when failing to parse weather json response", delegate() {
+			httpGet = delegate(string url, void delegate(int status, string response) cb) {
+				import std.string : startsWith;
+
+				if (url.startsWith("https://ipinfo.io/json")) {
+					cb(200, RESULT_IP);
+				} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
+					cb(200, "{");
+				}
+			};
+
+			getForecast(delegate(WeatherData weather_data, Exception err) {
+				err.shouldNotBeNull();
+				err.msg.shouldEqual(`Failed to parse "http://forecast.weather.gov/MapClick.php?lat=37.7749&lon=-122.4194&FcstType=json" JSON response`);
+			});
+		}),
+		it("Should return an error when the weather server fails", delegate() {
+			httpGet = delegate(string url, void delegate(int status, string response) cb) {
+				import std.string : startsWith;
+
+				if (url.startsWith("https://ipinfo.io/json")) {
+					cb(200, RESULT_IP);
+				} else if (url.startsWith("http://forecast.weather.gov/MapClick.php?lat=")) {
+					cb(500, "");
+				}
+			};
+
+			getForecast(delegate(WeatherData weather_data, Exception err) {
+				err.shouldNotBeNull();
+				err.msg.shouldEqual(`Request for "http://forecast.weather.gov/MapClick.php?lat=37.7749&lon=-122.4194&FcstType=json" failed with status code: 500`);
+			});
+		}),
 	);
 }
 
