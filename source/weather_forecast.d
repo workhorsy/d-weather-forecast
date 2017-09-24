@@ -72,10 +72,8 @@ struct WeatherData {
 Returns the weather forecast using a callback.
 
 Params:
- cb = The callback to fire when weather info has been downloaded.
-
-Throws:
-	If it fails to download or parse the JSON response.
+ cb = The callback to fire when weather info has been downloaded. The callback
+	sends the WeatherData data and an Exception if there was any problem.
 +/
 void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 	import std.stdio : stdout, stderr;
