@@ -5,7 +5,7 @@
 
 /++
 Get weather forecast with the D programming language. It first gets your longitude
-and latitude using http://ipinfo.io. Then uses them to look up your 
+and latitude using http://ipinfo.io. Then uses them to look up your
 weather using http://forecast.weather.gov.
 
 Home page:
@@ -89,7 +89,7 @@ void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 		if (err) {
 			cb(WeatherData.init, err);
 		} else {
-			string URL = "http://forecast.weather.gov/MapClick.php?lat=" ~ ipinfo_data.latitude ~ "&lon=" ~ ipinfo_data.longitude ~ "&FcstType=json";
+			const string URL = "http://forecast.weather.gov/MapClick.php?lat=" ~ ipinfo_data.latitude ~ "&lon=" ~ ipinfo_data.longitude ~ "&FcstType=json";
 
 			httpGet(URL, delegate(int status, string response) {
 				if (status != 200) {
@@ -120,4 +120,3 @@ void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 		}
 	});
 }
-
