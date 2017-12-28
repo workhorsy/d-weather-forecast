@@ -94,7 +94,7 @@ void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 			httpGet(URL, delegate(int status, string response) {
 				if (status != 200) {
 					auto err = new Exception("Request for \"%s\" failed with status code: %s".format(URL, status));
-					cb(weather_data, err);
+					cb(WeatherData.init, err);
 					return;
 				}
 
@@ -111,7 +111,7 @@ void getForecast(void delegate(WeatherData weather_data, Exception err) cb) {
 					weather_data.summary = j["data"]["weather"][0].str();
 				} catch (Throwable) {
 					auto err = new Exception("Failed to parse \"%s\" JSON response".format(URL));
-					cb(weather_data, err);
+					cb(WeatherData.init, err);
 					return;
 				}
 
