@@ -1,10 +1,10 @@
 {
 	"name": "example",
 	"targetType": "executable",
-	"sourceFiles": ["../source/weather_forecast.d"],
 	"mainSourceFile": "example.d",
 
 	"dependencies": {
-		"d-ipinfo": "~>3.0.0"
+		"d-ipinfo": "~>3.0.0",
+		"d-weather-forecast": {"path": ".."}
 	}
 }
