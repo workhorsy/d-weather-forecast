@@ -1,10 +1,10 @@
 
 
-import BDD;
 
 unittest {
 	import weather_forecast : getForecast, WeatherData;
 	import ipinfo : httpGet;
+	import BDD;
 
 	immutable string RESULT_IP =
 	`{
@@ -112,8 +112,4 @@ unittest {
 			});
 		}),
 	);
-}
-
-int main() {
-	return BDD.printResults();
 }
