@@ -11,7 +11,7 @@ weather using http://forecast.weather.gov.
 Home page:
 $(LINK https://github.com/workhorsy/d-weather-forecast)
 
-Version: 1.3.0
+Version: 2.0.0
 
 License:
 Boost Software License - Version 1.0
