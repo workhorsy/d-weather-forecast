@@ -1,3 +1,6 @@
+* Release 2.0.0
+	* Fixed Bug #6: Make tests run without main for changes in dmd 2.090
+
 12/28/2017 Release 1.3.0
 	* Fixed Bug #4: Don't return partial data on error
 
