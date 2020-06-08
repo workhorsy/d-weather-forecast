@@ -5,6 +5,6 @@
 	"mainSourceFile": "example.d",
 
 	"dependencies": {
-		"d-ipinfo": "~>1.0.0"
+		"d-ipinfo": "~>3.0.0"
 	}
 }

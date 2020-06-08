@@ -16,7 +16,7 @@
 			"targetName": "weather_forecast",
 			"importPaths": ["source/"],
 			"dependencies": {
-				"d-ipinfo": "~>1.0.0"
+				"d-ipinfo": "~>3.0.0"
 			}
 		},
 		{
@@ -26,7 +26,7 @@
 			"sourceFiles": ["test/test.d"],
 			"dependencies": {
 				"bdd": "~>2.0.0",
-				"d-ipinfo": "~>1.0.0"
+				"d-ipinfo": "~>3.0.0"
 			}
 		}
 	]
